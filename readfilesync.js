@@ -1,3 +1,4 @@
+//P32
 
 var fs=require('fs');
 var data=fs.readFileSync('file.txt','utf-8');
