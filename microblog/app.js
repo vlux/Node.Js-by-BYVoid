@@ -5,7 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var MongoStore = require('connect-mongo');
-var setting = require('../setting');
+var setting = require('./setting');
+var fs = require('fs');
+
+var accessLogfile = fs.createWriteStream('accessl.log',{flags:'a'});
+var errorLogfile = fs.createWriteStream('error.log',{flags:'a'});
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -22,7 +26,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());                    //Cookie解析中间件
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));       //删除以后可以直接让Nginx来处理静态文件，减少反向代理以及Node的开销
+
+app.use(logger({stream:accessLogfile}));
 
 app.use(session({            //提供会话支持
     secret: new MongoStore({
@@ -64,6 +70,12 @@ app.use(function(err, req, res, next) {
         message: err.message,
         error: {}
     });
+});
+
+app.error(function(err,req,res,next){
+    var meta ='[' + new Date() +']' + req.url + '\n';
+    errorLogfile.write(meta + err.stack + '\n');
+    next();
 });
 
 app.dynamicHelpers({            //动态视图助手，通过它我们才能在视图中访问绘画中的用户数据。
