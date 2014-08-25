@@ -1,5 +1,8 @@
 //P141
 
+//cluster的功能是生成与当前进程相同的紫禁城，并且允许父进程和子进程之间端口共享
+//与另一个模块child_process的最大区别在于cluster允许跨进程端口服用，给我们的网络服务器开发带来了很大的方便
+
 
 var cluster = require('cluster');
 var os = require('os');
